@@ -1,0 +1,33 @@
+- name: gcr.io/cloud-builders/gcloud
+  entrypoint: 'bash'
+  args: ['curl -X PUT -H "Authorization: Bearer ${AUTH_TOKEN}" "${CDF_API}/v3/namespaces/ag/apps/Demo_Persons_update_table_schema_v1_autodeploy" -d "@/home/liz/Demo_Persons_update_table_schema_v1-cdap-data-pipeline.json"
+
+
+
+
+export AUTH_TOKEN=$(gcloud auth print-access-token)
+
+export CDF_API=https://summit19onair-summit19cdfdemo-dot-usc1.datafusion.googleusercontent.com/api
+
+$ curl -X PUT -H "Authorization: Bearer ${AUTH_TOKEN}" "${CDF_API}/v3/namespaces/ag/apps/Demo_Persons_update_table_schema_v1_autodeploy" -d "@/home/liz/Demo_Persons_update_table_schema_v1-cdap-data-pipeline.json"
+
+
+  $ curl -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "access_token=$(gcloud auth application-default print-access-token)" \
+  https://www.googleapis.com/oauth2/v1/tokeninfo
+
+
+
+    - name: gcr.io/cloud-builders/gcloud
+  entrypoint: 'bash'
+  args: ['-c', 'export AUTH_TOKEN = ${gcloud auth print-access-token}']
+- name: gcr.io/cloud-builders/gcloud
+  entrypoint: 'bash'
+  args: ['-c', 'export CDF_API = https://customerdemo-demonstration-wonderland-dot-usw2.datafusion.googleusercontent.com/api']
+
+
+Steps:
+1. Clone git repo & get the json file that I want to deploy 
+2. get the access token that I'll be using to call the curl command (that calls the API)
+3. Call the curl command and pass the acccess key and file (hardcode the api URL)
+

@@ -1,0 +1,11 @@
+steps:
+- name: gcr.io/cloud-builders/git
+  args: ['clone', 'https://github.com/lizsuperawesome/customerdemo-cdf.git']
+- name: gcr.io/cloud-builders/gcloud
+  entrypoint: 'bash'
+  args: [ '-c', 'gcloud secrets versions access latest --secret=access-token > access-token.txt' ]
+- name: 'gcr.io/cloud-builders/gcloud'
+  entrypoint: 'bash'
+  args: 
+      - '-c'
+      - 'curl -X PUT -H "Authorization: Bearer $(cat access-token.txt)" "https://customerdemo-demonstration-wonderland-dot-usw2.datafusion.googleusercontent.com/api/v3/namespaces/cicd/apps/simple_insert_dim_product" -d "./customerdemo-cdf/pipelines/simple_insert_dim_product_dev-cdap-data-pipeline.json"'
