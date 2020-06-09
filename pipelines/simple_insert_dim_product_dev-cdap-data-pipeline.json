@@ -1,0 +1,145 @@
+{
+    "artifact": {
+        "name": "cdap-data-pipeline",
+        "version": "6.1.2",
+        "scope": "SYSTEM"
+    },
+    "description": "This pipeline is a very simple pipeline with no arguments.",
+    "name": "simple_insert_dim_product_dev",
+    "config": {
+        "resources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "driverResources": {
+            "memoryMB": 2048,
+            "virtualCores": 1
+        },
+        "connections": [
+            {
+                "from": "GCS_source_dim_product",
+                "to": "Wrangler_dim_product"
+            },
+            {
+                "from": "Wrangler_dim_product",
+                "to": "BQ_Sink_dim_product"
+            }
+        ],
+        "comments": [],
+        "postActions": [],
+        "properties": {},
+        "processTimingEnabled": true,
+        "stageLoggingEnabled": true,
+        "stages": [
+            {
+                "name": "GCS_source_dim_product",
+                "plugin": {
+                    "name": "GCSFile",
+                    "type": "batchsource",
+                    "label": "GCS_source_dim_product",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.14.2",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "project": "demonstration-wonderland",
+                        "format": "text",
+                        "skipHeader": "false",
+                        "serviceFilePath": "auto-detect",
+                        "filenameOnly": "false",
+                        "recursive": "false",
+                        "encrypted": "false",
+                        "copyHeader": "true",
+                        "schema": "{\"type\":\"record\",\"name\":\"etlSchemaBody\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}",
+                        "path": "gs://cdf-dev-files-in/dw-demo/dim_product.csv",
+                        "referenceName": "cdf-dev-files-in.dim_product.csv"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"etlSchemaBody\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ]
+            },
+            {
+                "name": "Wrangler_dim_product",
+                "plugin": {
+                    "name": "Wrangler",
+                    "type": "transform",
+                    "label": "Wrangler_dim_product",
+                    "artifact": {
+                        "name": "wrangler-transform",
+                        "version": "4.1.5",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "field": "*",
+                        "precondition": "false",
+                        "threshold": "1",
+                        "workspaceId": "a326b586-9c03-4bf4-b8eb-066a07fa9db5",
+                        "directives": "parse-as-csv :body ',' true\ndrop body\nfind-and-replace product_name s/\"//g\nset-type :rack_price float\nset-type :product_id integer",
+                        "schema": "{\"type\":\"record\",\"name\":\"etlSchemaBody\",\"fields\":[{\"name\":\"product_id\",\"type\":[\"int\",\"null\"]},{\"name\":\"product_name\",\"type\":[\"string\",\"null\"]},{\"name\":\"rack_price\",\"type\":[\"float\",\"null\"]}]}"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"etlSchemaBody\",\"fields\":[{\"name\":\"product_id\",\"type\":[\"int\",\"null\"]},{\"name\":\"product_name\",\"type\":[\"string\",\"null\"]},{\"name\":\"rack_price\",\"type\":[\"float\",\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "GCS_IN_dim_product",
+                        "schema": "{\"type\":\"record\",\"name\":\"etlSchemaBody\",\"fields\":[{\"name\":\"body\",\"type\":\"string\"}]}"
+                    }
+                ]
+            },
+            {
+                "name": "BQ_Sink_dim_product",
+                "plugin": {
+                    "name": "BigQueryTable",
+                    "type": "batchsink",
+                    "label": "BQ_Sink_dim_product",
+                    "artifact": {
+                        "name": "google-cloud",
+                        "version": "0.14.2",
+                        "scope": "SYSTEM"
+                    },
+                    "properties": {
+                        "project": "auto-detect",
+                        "serviceFilePath": "auto-detect",
+                        "operation": "insert",
+                        "truncateTable": "false",
+                        "allowSchemaRelaxation": "false",
+                        "location": "US",
+                        "createPartitionedTable": "false",
+                        "partitionFilterRequired": "false",
+                        "referenceName": "BQ_Sink_dim_product",
+                        "dataset": "cicd_demo_dev",
+                        "table": "dim_product",
+                        "schema": "{\"type\":\"record\",\"name\":\"etlSchemaBody\",\"fields\":[{\"name\":\"product_id\",\"type\":\"int\"},{\"name\":\"product_name\",\"type\":[\"string\",\"null\"]},{\"name\":\"rack_price\",\"type\":[\"float\",\"null\"]}]}"
+                    }
+                },
+                "outputSchema": [
+                    {
+                        "name": "etlSchemaBody",
+                        "schema": "{\"type\":\"record\",\"name\":\"etlSchemaBody\",\"fields\":[{\"name\":\"product_id\",\"type\":\"int\"},{\"name\":\"product_name\",\"type\":[\"string\",\"null\"]},{\"name\":\"rack_price\",\"type\":[\"float\",\"null\"]}]}"
+                    }
+                ],
+                "inputSchema": [
+                    {
+                        "name": "Wrangler_dim_product",
+                        "schema": "{\"type\":\"record\",\"name\":\"etlSchemaBody\",\"fields\":[{\"name\":\"product_id\",\"type\":[\"int\",\"null\"]},{\"name\":\"product_name\",\"type\":[\"string\",\"null\"]},{\"name\":\"rack_price\",\"type\":[\"float\",\"null\"]}]}"
+                    }
+                ]
+            }
+        ],
+        "schedule": "0 * * * *",
+        "engine": "spark",
+        "numOfRecordsPreview": 100,
+        "description": "This pipeline is a very simple pipeline with no arguments.",
+        "maxConcurrentRuns": 1
+    }
+}
