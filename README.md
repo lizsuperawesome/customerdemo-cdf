@@ -30,5 +30,3 @@ To prepare for this demo you need:
 1. Two data fusion instances - one to serve as a dev environment, and one as prod
 2. A pipeline. In our case we have a simple pipeline that moves a file from GCS to BigQuery
 3. A Code Repository - in our case we will use GitHub - you can use any that can be mirrored from Cloud Source Repositories including GitHub, BitBucket and GitLab. 
-
-New change
